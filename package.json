@@ -1,0 +1,57 @@
+{
+  "name": "abacus.js",
+  "version": "0.0.1",
+  "description": "JavaScript-implementation of abacus, a human calculation language.",
+  "main": "index.js",
+  "author": "Ben Yellin",
+  "license": "MIT",
+  "browser": "browser.js",
+  "module": "index.mjs",
+  "bin": {
+    "abacus": "cli.js"
+  },
+  "files": [
+    "browser.development.js",
+    "browser.development.js.map",
+    "browser.js",
+    "cli.js",
+    "index.js",
+    "index.js.map",
+    "index.mjs",
+    "index.mjs.map"
+  ],
+  "scripts": {
+    "build": "yarn run build:browser && yarn run build:cli && yarn run build:node",
+    "build:browser": "yarn run build:browser:min && yarn run build:browser:dev",
+    "build:browser:dev": "NODE_ENV=browserdev rollup --config --silent",
+    "build:browser:min": "NODE_ENV=browsermin rollup --config --silent",
+    "build:cli": "NODE_ENV=cli rollup --config --silent",
+    "build:node": "rollup --config --silent",
+    "dev": "NODE_ENV=browserdev rollup --config --watch",
+    "prepublishOnly": "yarn test && yarn run build",
+    "pretest:tape": "yarn run build:node",
+    "test": "yarn run test:js && yarn run test:tape",
+    "test:js": "eslint *.js src/*.js --cache --ignore-path .gitignore --quiet",
+    "test:tape": "node test"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "@babel/plugin-proposal-export-default-from": "^7.2.0",
+    "@babel/preset-env": "^7.4.4",
+    "babel-eslint": "^10.0.1",
+    "babel-plugin-transform-for-of-as-array": "^1.1.1",
+    "eslint": "^5.16.0",
+    "rollup": "^1.11.3",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-terser": "^4.0.4"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11"
+  }
+}
