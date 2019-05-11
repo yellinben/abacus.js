@@ -1,13 +1,9 @@
-"use strict";
+'use strict';
 
 module.exports = {
 	plugins: [
-		['@babel/proposal-class-properties', {
-			loose: true
-		}],
-		['transform-for-of-as-array', {
-			loose: true
-		}],
+		['@babel/proposal-class-properties', {loose: true}],
+		['transform-for-of-as-array', {loose: true}],
 		['@babel/plugin-proposal-export-default-from']
 	],
 	presets: [
@@ -15,7 +11,7 @@ module.exports = {
 			corejs: 3,
 			loose: true,
 			modules: false,
-			targets: { node: 8 },
+			targets: {node: 8},
 			useBuiltIns: 'entry'
 		}]
 	]

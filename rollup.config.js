@@ -10,14 +10,14 @@ const isCli = String(process.env.NODE_ENV).includes('cli');
 const pathname = isCli ? 'cli/index' : 'index';
 const input = `src/${pathname}.js`;
 const output = isBrowserDev
-	? { file: 'build/browser.js', format: 'cjs', sourcemap: true }
+	? {file: 'build/browser.dev.js', format: 'cjs', sourcemap: true}
 : isBrowser
-	? { file: 'build/browser.min.js', format: 'cjs' }
+	? {file: 'build/browser.js', format: 'cjs'}
 : isCli
-	? { file: 'build/cli.js', format: 'cjs' }
+	? {file: 'build/cli.js', format: 'cjs'}
 : [
-	{ file: 'build/index.js', format: 'cjs', sourcemap: true },
-	{ file: 'build/index.mjs', format: 'esm', sourcemap: true }
+	{file: 'build/index.js', format: 'cjs', sourcemap: true},
+	{file: 'build/index.mjs', format: 'esm', sourcemap: true}
 ];
 const plugins = [
 	babel()
