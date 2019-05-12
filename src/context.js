@@ -39,6 +39,10 @@ export default class Context {
     return Context.reservedWords;
   }
 
+  processors() {
+    return Context.processors;
+  }
+
   allProcessors() {
     return Context.allProcessors();
   }
@@ -141,7 +145,7 @@ export default class Context {
   }
 
   resultLines() {
-    return this.lines.map(line => line.result);
+    return this.lines.map(line => line.result || "");
   }
 
   results() {
@@ -149,7 +153,8 @@ export default class Context {
   }
 
   outputLines() {
-    return this.resultLines().map(line => line || "");
+    return this.resultLines()
+      .map(line => `${line.input} => ${line.result}`);
   }
 
   output() {
