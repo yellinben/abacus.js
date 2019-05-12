@@ -10,19 +10,16 @@ export default class PercentageProcessor extends Processor {
       (matches) => {
         const percentage = parseFloat(matches[1]);
         const operator = matches[2];
-        const line_expr = matches[3];
-        const expr = `${line_expr} * ${percentage/100}`;
-  
-        let output;
+        const expr = `(${matches[3]})`;
+        
+        let output = `${expr} * ${percentage/100}`;
+        
         switch (operator) {
-          case 'of':
-            output = expr;
-            break;
           case 'off':
-            output = `${expr} - (${expr})`;
+            output = `${expr} - (${output})`;
             break;
           case 'on':
-            output = `${expr} + (${expr})`;
+            output = `${expr} + (${output})`;
             break;
           default:
             break;
