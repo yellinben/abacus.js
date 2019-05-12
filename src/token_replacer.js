@@ -8,7 +8,7 @@ export default class TokenReplacer {
   }
 
   tokens(text) {
-    return (text || '').split(' ');
+    return (text || '').match(/\S+/g);
   }
 
   eachToken(text, callback) {
@@ -16,7 +16,8 @@ export default class TokenReplacer {
   }
 
   processTokens(text, callback) {
-    return this.eachToken(text, callback).join(' ');
+    return this.eachToken(text, callback)
+      .join(' ').trim();
   }
 
   replaceToken = (token) => {
