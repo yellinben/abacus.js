@@ -1,71 +1,86 @@
 import TokenReplacer from './token_replacer';
 
 export default class Processor {
-  constructor(name, opts, handler) {
-    opts = {
+  constructor(opts, handler) {
+    // turn CamelCase class name 
+    // into snake_case display name
+    const name = this.constructor.name
+      .replace('Processor', '')
+      .replace(/([a-z])([A-Z])/g, '$1_$2')
+      .toLowerCase();
+
+    Object.assign(this, {
       name, handler,
       priority: 1,
       reserved: [],
       replacements: {},
-      ...opts,
-    };
+      match: undefined,
+      matchTest: undefined
+    }, opts);
 
-    if (typeof opts.handler === 'object') {
-      // handler is a dictionary of replacements
-      opts.replacements = opts.handler;
-      opts.handler = undefined;
+    console.log('[init]', this.constructor, this.constructor.name, this);
+
+    // if handler is a dictionary of replacements
+    if (typeof this.handler === 'object') {
+      this.replacements = this.handler;
+      this.handler = null;
     }
 
-    if (!opts.handler && Object.keys(opts.replacements).length) {
-      opts.handler = (matches) => ({
+    if (!this.handler && Object.keys(this.replacements).length) {
+      this.handler = (matches) => ({
         output: TokenReplacer.run(this.replacements, matches.input)
       });
     }
 
     // add replacement keys to reserved words
-    if (Object.keys(opts.replacements).length) {
-      opts.reserved = [...new Set([
-        ...opts.reserved, 
-        ...Object.keys(opts.replacements)
+    if (Object.keys(this.replacements).length) {
+      this.reserved = [...new Set([
+        ...this.reserved, 
+        ...Object.keys(this.replacements)
       ])];
     }
     
     // `match` can be either:
     //  * regular expression (string or RegExp object)
     //  * custom function returning truthy/falsy value
-    if (typeof opts.match === 'function') {
-      this.matchTest = opts.match;
-    } else if (opts.match) {
-      this.matchTest = (text) => {
-        const regex = new RegExp(opts.match);
-        return text.match(regex);
-      };
+    if (typeof this.match === 'function') {
+      this.matchTest = this.match;
+      this.match = null;
+    } else if (this.match) {
+      this.match = new RegExp(this.match);
+      this.matchTest = (text) => text.match(this.match);
     } else {
       this.matchTest = (text) => [text];
     }
-
-    Object.assign(this, opts);
   }
 
   matchInput(input) {
-    const match = this.matchTest(input);
+    const match = this.matchTest(`${input}`);
     if (match) return {...match, input};
   }
 
   run(text, context) {
-    const matches = this.matchInput(text || '');
-    if (matches) return this.exec(matches, context);
+    const result = {
+      output: text, 
+      variable: undefined,
+      matched: false
+    }
+
+    const matches = this.matchInput(text);
+    if (matches) Object.assign(result, this.exec(matches, context));
+
+    return result;
   }
 
   exec(matches, context) {
     let result = this.handler(matches, context);
-    if (result && typeof result !== 'object')
-      result = {output: result.toString()};
+    if (typeof result !== 'object') 
+      result = {output: result};
+    return {matched: true, ...result};
+  }
 
-    return {
-      output: undefined, 
-      variable: undefined,
-      ...result
-    };
+  get replacer() {
+    return this._replacer = this._replacer || 
+      new TokenReplacer(this.replacements);
   }
 }

@@ -11,7 +11,8 @@ export default class Context {
   }
 
   static registerProcessor(processor) {
-    if (typeof processor === 'function') processor = new processor();
+    if (typeof processor === 'function')
+      processor = new processor();
 
     if (processor && processor.name) {
       Context.processors[processor.name] = processor;
@@ -25,7 +26,7 @@ export default class Context {
 
   static allProcessors() {
     return Object.values(Context.processors).sort(
-      (a, b) => a.proirity - b.proirity,
+      (a, b) => a.priority - b.priority,
     );
   }
 

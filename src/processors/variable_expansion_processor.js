@@ -3,7 +3,7 @@ import TokenReplacer from '../token_replacer';
 
 export default class VariableExpansionProcessor extends Processor {
   constructor() {
-    super('variable_expansion', {
+    super({
       priority: 5
     }, (matches, context) => {
       const replacer = new TokenReplacer(context.variableResults());

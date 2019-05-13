@@ -2,7 +2,7 @@ import Processor from '../processor';
 
 export default class PercentageProcessor extends Processor {
   constructor() {
-    super('percentage', {
+    super({
         match: /(?<percentage>-?[\d.]+)% (?<operator>off?|on) (?<expr>.*$)/,
         reserved: ['of', 'off', 'on'],
         priority: 2

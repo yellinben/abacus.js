@@ -2,7 +2,7 @@ import Processor from '../processor';
 
 export default class VariableAssignmentProcessor extends Processor {
   constructor() {
-    super('variable_assignment', {
+    super({
         match: /(?<var>[\w]+) = (?<expr>.*)/,
         reserved: ['='],
         priority: 0,
