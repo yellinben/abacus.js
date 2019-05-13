@@ -3,16 +3,22 @@ export default class TokenReplacer {
     this.replacements = replacements;
   }
 
+  static run(replacements, text) {
+    const replacer = new TokenReplacer(replacements);
+    return replacer.run(text);
+  }
+
   run(text) {
     return this.processTokens(text, this.replaceToken);
   }
 
   tokens(text) {
-    return `${text}`.match(/\S+/g);
+    return `${text}`.match(/\S+/g) || [];
   }
 
   eachToken(text, callback) {
-    return (this.tokens(text) || []).map(callback);
+    return this.tokens(text)
+      .map(callback.bind(this));
   }
 
   processTokens(text, callback) {
@@ -22,10 +28,5 @@ export default class TokenReplacer {
 
   replaceToken(token) {
     return this.replacements[token] || token;
-  }
-
-  static run(replacements, text) {
-    const replacer = new TokenReplacer(replacements);
-    return replacer.run(text);
   }
 }
