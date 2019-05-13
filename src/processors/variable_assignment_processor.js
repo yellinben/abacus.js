@@ -7,10 +7,10 @@ export default class VariableAssignmentProcessor extends Processor {
         reserved: ['='],
         priority: 0,
       },
-      (matches) => {
-        const vars = {[matches[1]]: matches.line};
-        return {output: matches[2], vars};
-      },
+      (matches) => ({
+        output: matches[2], 
+        variable: matches[1]
+      }),
     );
   }
 }

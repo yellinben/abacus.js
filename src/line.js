@@ -59,8 +59,9 @@ export default class Line {
   }
 
   _evaluate() {
-    // very bad; replace with actual
-    // arithmetic parser
-    if (this.isCalculatable()) return eval(this.value());
+    // [very bad] replace with 
+    // actual arithmetic parser
+    if (this.isCalculatable())
+      return eval(this.value());
   }
 }

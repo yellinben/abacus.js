@@ -14,14 +14,12 @@ export default class Processor {
       // handler is a dictionary of replacements
       opts.replacements = opts.handler;
       opts.handler = undefined;
-    } else if (typeof opts.handler == 'string') {
-      const output = opts.handler;
-      opts.handler = () => output;
-      opts.handler = undefined;
     }
 
     if (!opts.handler && Object.keys(opts.replacements).length) {
-      opts.handler = (matches) => this.replace(matches.line.value());
+      opts.handler = (matches) => ({
+        output: TokenReplacer.run(this.replacements, matches.input)
+      });
     }
 
     // add replacement keys to reserved words
@@ -49,20 +47,25 @@ export default class Processor {
     Object.assign(this, opts);
   }
 
-  replace(text) {
-    const replacer = new TokenReplacer(this.replacements);
-    return replacer.run(text);
+  matchInput(input) {
+    const match = this.matchTest(input);
+    if (match) return {...match, input};
   }
 
-  matchLine(line) {
-    const match = this.matchTest(line.value());
-    if (match) return {...match, line};
+  run(text, context) {
+    const matches = this.matchInput(text || '');
+    if (matches) return this.exec(matches, context);
   }
 
-  run(line, context) {
-    const matches = this.matchLine(line);
-    return new Promise(resolve => {
-      if (matches) resolve(this.handler(matches, context));
-    });
+  exec(matches, context) {
+    let result = this.handler(matches, context);
+    if (result && typeof result !== 'object')
+      result = {output: result.toString()};
+
+    return {
+      output: undefined, 
+      variable: undefined,
+      ...result
+    };
   }
 }

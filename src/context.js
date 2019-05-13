@@ -52,14 +52,12 @@ export default class Context {
   }
 
   setVariables(vars) {
-    this.variables = {...this.variables, ...vars[0]};
+    this.variables = {...this.variables, ...vars};
   }
 
   setVars(...vars) {
     if (vars && vars.length == 2 && typeof vars[0] == 'string')
       this.setVariable(vars[0], vars[1]);
-    else if (vars && vars.length > 1 && typeof vars[0] == 'string')
-      this.setVariables(Object.fromEntries(chunk(vars, 2)));
     else if (vars && vars.length && typeof vars[0] == 'object')
       this.setVariables(Object.assign({}, ...vars));
   }
@@ -92,7 +90,7 @@ export default class Context {
 
   addLine(input) {
     const line = this.insertLine(input);
-    this.processLines();
+    this.processLine(this.lines.length-1);
     return line;
   }
 
@@ -102,34 +100,49 @@ export default class Context {
     return line;
   }
 
-  processLines() {
+  addLines(...lines) {
+    [...lines].flat().forEach(input => this.insertLine(input));
+    this.processLines();
+  }
+
+  addText(text) {
+    this.addLines((text || '').split('\n'));
+  }
+
+  processLines = () => {
     this.lines.forEach((line, index) => {
       this.processLine(line, index);
     });
   }
 
-  processLine(line, index) {
+  processLine = (line, index) => {
+    const vars = [];
+    let lineValue = line.value();
+
     this.allProcessors().forEach(processor => {
-      this.runLineInProcessor(line, index, processor);
+      const result = this.processInput(lineValue, index, processor);
+      if (!result) return;
+      lineValue = result['output'];
+      if (result['variable']) vars.push(result['variable']);
     });
 
-    if (typeof index !== 'undefined')
-      this.setVariable(`line${index+1}`, line);
+    line._processed = lineValue;
+
+    if (typeof index !== 'undefined') vars.push(`line${index+1}`);
+    vars.forEach(v => this.setVariable(v, line));
+
+    return line;
   }
 
-  runLineInProcessor(line, index, processor) {
-    processor.run(line, this).then(result => {
-      if (result && typeof(result) == 'object') {
-        if ('output' in result)
-          line.processed = result.output;
-        if ('vars' in result)
-          this.setVariables(result.vars);
-      } else if (result) {
-        line.processed = result.toString();
-      } else {
-        line.processed = result;
-      }
-    });
+  processInput = (input, index, processor) => {
+    const result = processor.run(input, this);
+    if (!result) return;
+
+    return {
+      output: undefined, 
+      variable: undefined,
+      ...result
+    };
   }
 
   inputLines() {
