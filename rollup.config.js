@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser';
 const isBrowser = String(process.env.NODE_ENV).includes('browser');
 const isBrowserDev = String(process.env.NODE_ENV).includes('browserdev');
 const isCli = String(process.env.NODE_ENV).includes('cli');
+const isTest = String(process.env.NODE_ENV).includes('cli');
 
 const pathname = isCli ? 'cli/index' : 'index';
 const input = `src/${pathname}.js`;
@@ -19,6 +20,18 @@ const output = isBrowserDev
 	{file: 'build/index.js', format: 'cjs', sourcemap: true},
 	{file: 'build/index.mjs', format: 'esm', sourcemap: true}
 ];
+
+
+const babelPresets = {
+	corejs: 3,
+	loose: true,
+	modules: false,
+	targets: 'last 2 chrome versions, last 2 edge versions, last 2 firefox versions, last 2 safari versions, last 2 ios versions',
+	useBuiltIns: 'entry'
+};
+
+if (isTest) babelPresets['modules'] = 'cjs';
+
 const plugins = [
 	babel()
 ].concat(
@@ -27,15 +40,7 @@ const plugins = [
 		commonjs(),
 		babel({
 			babelrc: false,
-			presets: [
-				['@babel/env', {
-					corejs: 3,
-					loose: true,
-					modules: false,
-					targets: 'last 2 chrome versions, last 2 edge versions, last 2 firefox versions, last 2 safari versions, last 2 ios versions',
-					useBuiltIns: 'entry'
-				}]
-			]
+			presets: [['@babel/env', babelPresets]]
 		}),
 		modernUMD('Abacus', 'Abacus')
 	] : [],
