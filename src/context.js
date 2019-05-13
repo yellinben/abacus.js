@@ -36,14 +36,17 @@ export default class Context {
   }
 
   reservedWords() {
-    return Context.reservedWords;
+    return [...new Set([
+      ...Context.reservedWords, 
+      Object.keys(this.variables)
+    ])];
   }
 
-  processors() {
+  get processors() {
     return Context.processors;
   }
 
-  allProcessors() {
+  get allProcessors() {
     return Context.allProcessors();
   }
 
@@ -116,20 +119,29 @@ export default class Context {
   }
 
   processLine = (line, index) => {
+    if (typeof index === 'undefined') {
+      const lineIndex = this.lines.indexOf(line);
+      if (lineIndex >= 0) index = lineIndex;
+    }
+
     const vars = [];
     let lineValue = line.value();
 
-    this.allProcessors().forEach(processor => {
+    this.allProcessors.forEach(processor => {
       const result = this.processInput(lineValue, index, processor);
-      if (!result) return;
-      lineValue = result['output'];
-      if (result['variable']) vars.push(result['variable']);
+      if (result['output'])
+        lineValue = result['output'];
+      if (result['variable']) 
+        vars.push(result['variable']);
     });
 
     line._processed = lineValue;
 
-    if (typeof index !== 'undefined') vars.push(`line${index+1}`);
-    vars.forEach(v => this.setVariable(v, line));
+    if (typeof index !== 'undefined')
+      vars.push(`line${index+1}`);
+
+    vars.filter(Boolean)
+      .forEach(name => this.setVariable(name, line));
 
     return line;
   }
