@@ -1,0 +1,13 @@
+import Processor from '../processor';
+import TokenReplacer from '../token_replacer';
+
+export default class VariableExpansionProcessor extends Processor {
+  constructor() {
+    super('variable_expansion', {
+      priority: 5
+    }, (matches, context) => {
+      const replacer = new TokenReplacer(context.variableResults());
+      return {output: replacer.run(matches.input)};
+    });
+  }
+}
