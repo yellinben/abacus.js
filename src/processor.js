@@ -18,8 +18,6 @@ export default class Processor {
       matchTest: undefined
     }, opts);
 
-    console.log('[init]', this.constructor, this.constructor.name, this);
-
     // if handler is a dictionary of replacements
     if (typeof this.handler === 'object') {
       this.replacements = this.handler;
