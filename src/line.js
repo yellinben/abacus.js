@@ -1,4 +1,3 @@
-
 export default class Line {
   constructor(input) {
     this._input = input;
@@ -22,15 +21,15 @@ export default class Line {
   }
 
   get processed() {
-    if (this.isCalculatable()) this._processed = this.value();
+    if (this.isCalculatable()) this._processed = this.value;
     return this._processed;
   }
 
-  value() {
+  get value() {
     return this._processed || this._input;
   }
 
-  evaluated() {
+  get evaluated() {
     return this.result || this.value;
   }
 
@@ -45,12 +44,26 @@ export default class Line {
   }
 
   resultFormatted() {
-    return this.result;
+    return this.result || '';
+  }
+
+  hasResult() {
+    return typeof this.result !== 'undefined';
+  }
+
+  isBlank() {
+    return (this.value() || '').length < 1;
+  }
+
+  isProcessable() {
+    return !this.isBlank() && !this.isCalculatable();
   }
 
   isCalculatable() {
+    // to be calculable, line must only contain
+    // numeric and mathematical symbols
     const valid_re = /^[0-9().<>\s&%!*/^+-]+$/;
-    return valid_re.test(this.value());
+    return valid_re.test(this.value);
   }
 
   calculate() {
@@ -62,6 +75,13 @@ export default class Line {
     // [very bad] replace with 
     // actual arithmetic parser
     if (this.isCalculatable())
-      return eval(this.value());
+      return eval(this.value);
+  }
+
+  print() {
+    if (this.hasResult())
+      return `${this.input} => ${this.resultFormatted()}`;
+    else
+      return this.input;
   }
 }

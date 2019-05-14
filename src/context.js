@@ -126,7 +126,7 @@ export default class Context {
     }
 
     const vars = [];
-    let lineValue = line.value();
+    let lineValue = line.value;
 
     this.allProcessors.forEach(processor => {
       const result = this.processInput(lineValue, index, processor);
@@ -179,8 +179,7 @@ export default class Context {
   }
 
   outputLines() {
-    return this.resultLines()
-      .map(line => `${line.input} => ${line.result}`);
+    return this.lines.map(line => line.print());
   }
 
   output() {
