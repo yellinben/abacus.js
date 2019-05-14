@@ -52,7 +52,7 @@ export default class Line {
   }
 
   isBlank() {
-    return (this.value() || '').length < 1;
+    return (this.value || '').length < 1;
   }
 
   isProcessable() {
