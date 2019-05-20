@@ -42,3 +42,14 @@ test('result is properly evaluated if isCalculatable', t => {
   const line = new Line('1 + 1');
   t.is(line.result, 2);
 });
+
+test('print returns display-formatted string', t => {
+  const line = new Line('1 + 1');
+  line._result = 2;
+  t.is(line.print(), '1 + 1 => 2');
+});
+
+test('print returns input only when line has no result', t => {
+  const line = new Line('// comment');
+  t.is(line.print(), line.input);
+});
