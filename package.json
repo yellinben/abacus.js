@@ -25,8 +25,9 @@
     "dev": "NODE_ENV=browserdev rollup --config --watch",
     "prepublishOnly": "yarn test && yarn run build",
     "lint": "eslint src/ test/",
-    "test": "NODE_ENV=test npx ava",
-    "test:watch": "NODE_ENV=test npx ava --watch"
+    "test": "NODE_ENV=test npx ava --verbose",
+    "test:watch": "NODE_ENV=test npx ava --watch",
+    "test:quiet": "NODE_ENV=test npx ava"
   },
   "engines": {
     "node": ">=8.0.0"
