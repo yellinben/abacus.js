@@ -25,3 +25,9 @@ test('add replacements if handler is object', t => {
   const processor = new Processor({}, replacements);
   t.is(processor.replacements.toString(), replacements.toString());
 });
+
+test('add replacements keys as reserved words', t => {
+  const replacements = {foo: 1, bar: "hello"};
+  const processor = new Processor({replacements});
+  t.is(processor.reserved.toString(), Object.keys(replacements).toString());
+});
