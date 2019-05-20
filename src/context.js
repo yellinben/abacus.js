@@ -36,42 +36,12 @@ export default class Context {
     ];
   }
 
-  reservedWords() {
-    return [...new Set([
-      ...Context.reservedWords, 
-      Object.keys(this.variables)
-    ])];
-  }
-
   get processors() {
     return Context.processors;
   }
 
   get allProcessors() {
     return Context.allProcessors();
-  }
-
-  setVariable(name, value) {
-    this.variables[name] = value;
-  }
-
-  setVariables(vars) {
-    this.variables = {...this.variables, ...vars};
-  }
-
-  setVars(...vars) {
-    if (vars && vars.length == 2 && typeof vars[0] == 'string')
-      this.setVariable(vars[0], vars[1]);
-    else if (vars && vars.length && typeof vars[0] == 'object')
-      this.setVariables(Object.assign({}, ...vars));
-  }
-
-  getVariable(name) {
-    return this.variables[name];
-  }
-
-  hasVariable(name) {
-    return !!this.getVariable(name);
   }
 
   insertLine(input) {
@@ -94,7 +64,7 @@ export default class Context {
 
   addLine(input) {
     const line = this.insertLine(input);
-    this.processLine(this.lines.length-1);
+    this.processLine(line);
     return line;
   }
 
@@ -120,10 +90,19 @@ export default class Context {
   }
 
   processLine = (line, index) => {
+    if (typeof line === 'number' && this.lines[line]) {
+      index = line;
+      line = this.lines[index];
+    } else if (typeof line === 'number') {
+      line = null;
+    }
+
     if (typeof index === 'undefined') {
       const lineIndex = this.lines.indexOf(line);
       if (lineIndex >= 0) index = lineIndex;
     }
+
+    if (!line) return;
 
     const vars = [];
     let lineValue = line.value;
@@ -158,6 +137,63 @@ export default class Context {
     };
   }
 
+  reservedWords() {
+    return [...new Set([
+      ...Context.reservedWords, 
+      Object.keys(this.variables)
+    ])];
+  }
+
+  setVariable(name, value) {
+    this.variables[name] = value;
+  }
+
+  setVariables(vars) {
+    this.variables = {...this.variables, ...vars};
+  }
+  setVars(...vars) {
+    if (vars && vars.length == 2 && typeof vars[0] == 'string')
+      this.setVariable(vars[0], vars[1]);
+    else if (vars && vars.length && typeof vars[0] == 'object')
+      this.setVariables(Object.assign({}, ...vars));
+  }
+
+  getVariable(name) {
+    return this.variables[name];
+  }
+
+  getVariables(...names) {
+    return [...names].map(name => this.getVariable(name));
+  }
+
+  hasVariable(name) {
+    return !!this.getVariable(name);
+  }
+
+  variableExpression(name) {
+    if (this.hasVariable(name))
+      return this.getVariable().processed;
+  }
+
+  variableResult(name) {
+    if (this.hasVariable(name))
+      return this.getVariable().result;
+  }
+
+  variableExpressions() {
+    return Object.keys(this.variables).reduce((results, varName) => {
+      results[varName] = this.variables[varName].processed;
+      return results;
+    }, {});
+  }
+
+  variableResults() {
+    return Object.keys(this.variables).reduce((results, varName) => {
+      results[varName] = this.variables[varName].result;
+      return results;
+    }, {});
+  }
+
   inputLines() {
     return this.lines.map(line => line.input);
   }
@@ -184,20 +220,6 @@ export default class Context {
 
   output() {
     return this.outputLines().join('\n');
-  }
-
-  variableExpressions() {
-    return Object.keys(this.variables).reduce((results, varName) => {
-      results[varName] = this.variables[varName].processed;
-      return results;
-    }, {});
-  }
-
-  variableResults() {
-    return Object.keys(this.variables).reduce((results, varName) => {
-      results[varName] = this.variables[varName].result;
-      return results;
-    }, {});
   }
 }
 
