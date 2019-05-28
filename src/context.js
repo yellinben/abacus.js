@@ -1,5 +1,5 @@
 import Line from './line';
-import processors from './processors';
+import processors from './processors/index';
 
 export default class Context {
   static processors = [];
@@ -75,12 +75,23 @@ export default class Context {
   }
 
   addLines(...lines) {
-    [...lines].flat().forEach(input => this.insertLine(input));
+    const prevLength = this.lines.length;
+
+    [...lines].flat().forEach(input => {
+      return this.insertLine(input)
+    });
+
     this.processLines();
+    return this.lines.slice(prevLength);
   }
 
   addText(text) {
-    this.addLines((text || '').split('\n'));
+    const lines = (text || '').split('\n');
+    return this.addLines(lines);
+  }
+
+  runLine(text) {
+    return this.addLine(text).result;
   }
 
   processLines = () => {
@@ -104,23 +115,33 @@ export default class Context {
 
     if (!line) return;
 
-    const vars = [];
+    let lineVars = [];
+    let lineData = {};
     let lineValue = line.value;
 
     this.allProcessors.forEach(processor => {
-      const result = this.processInput(lineValue, index, processor);
-      if (result['output'])
-        lineValue = result['output'];
-      if (result['variable']) 
-        vars.push(result['variable']);
+      const response = this.processInput(lineValue, index, processor);
+
+      if ('variable' in response) 
+        lineVars.push(response.variable);
+
+      if ('output' in response)
+        lineValue = response.output;
+
+      if ('result' in response) 
+        lineData._result = response.result;
+
+      if ('units' in response)
+        lineData._units = response.units;
     });
 
-    line._processed = lineValue;
-
+    lineData._processed = lineValue;
+    Object.assign(line, lineData);
+    
     if (typeof index !== 'undefined')
-      vars.push(`line${index+1}`);
+      lineVars.push(`line${index+1}`);
 
-    vars.filter(Boolean)
+    lineVars.filter(Boolean)
       .forEach(name => this.setVariable(name, line));
 
     return line;
