@@ -6,23 +6,21 @@
   "author": "Ben Yellin",
   "license": "MIT",
   "browser": "dist/browser.js",
-  "module": "dist/index.mjs",
+  "module": "dist/index.js",
   "files": [
     "dist/browser.dev.js",
     "dist/browser.dev.js.map",
     "dist/browser.js",
     "dist/index.js",
-    "dist/index.js.map",
-    "dist/index.mjs",
-    "dist/index.mjs.map"
+    "dist/index.js.map"
   ],
   "scripts": {
     "build": "yarn run build:browser && yarn run build:node",
-    "build:browser": "yarn run build:browser:min && yarn run build:browser:dev",
-    "build:browser:dev": "NODE_ENV=browserdev rollup --config --silent",
+    "build:browser": "yarn run build:browser:min && yarn run build:browser:dev --silent",
+    "build:browser:dev": "NODE_ENV=browserdev rollup --config",
     "build:browser:min": "NODE_ENV=browsermin rollup --config --silent",
-    "build:node": "rollup --config --silent",
-    "dev": "NODE_ENV=browserdev rollup --config --watch",
+    "build:node": "rollup --config",
+    "dev": "yarn run build:browser:dev --watch",
     "prepublishOnly": "yarn test && yarn run build",
     "lint": "eslint src/ test/",
     "test": "NODE_ENV=test npx ava --verbose",
@@ -76,7 +74,6 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "convert-units": "^2.3.4",
-    "lodash": "^4.17.11"
+    "convert-units": "^2.3.4"
   }
 }

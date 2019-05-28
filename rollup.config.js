@@ -12,15 +12,12 @@ const input = `src/index.js`;
 let output;
 
 if (isBrowserDev) {
-	output = {file: 'dist/browser.dev.js', format: 'umd', sourcemap: 'inline'};
+	output = {name, file: 'dist/browser.dev.js', format: 'umd', sourcemap: 'inline'};
 } else if (isBrowser) {
-	output = {file: 'dist/browser.js', format: 'umd'}
+	output = {name, file: 'dist/browser.js', format: 'umd'};
 } else {
-	output = {file: 'dist/index.js', format: 'cjs', sourcemap: 'inline'},
-	output = {file: 'dist/index.mjs', format: 'esm', sourcemap: 'inline'}
+	output = {name, file: 'dist/index.js', format: 'cjs', sourcemap: 'inline'};
 }
-
-output['name'] = name;
 
 const babelPresets = {
 	corejs: 3,
@@ -48,5 +45,5 @@ const plugins = [
 );
 
 export default { 
-	input, output, plugins 
+	input, output, plugins
 };
