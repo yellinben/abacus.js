@@ -45,7 +45,8 @@ export default class Processor {
       this.matchTest = this.match;
       this.match = null;
     } else if (this.match) {
-      this.match = new RegExp(this.match);
+      if (typeof this.match === 'string')
+        this.match = new RegExp(this.match);
       this.matchTest = (text) => text.match(this.match);
     } else {
       this.matchTest = (text) => [text];
@@ -58,23 +59,23 @@ export default class Processor {
   }
 
   run(text, context) {
-    const result = {
+    const response = {
       output: text, 
       variable: undefined,
       matched: false
     }
 
     const matches = this.matchInput(text);
-    if (matches) Object.assign(result, this.exec(matches, context));
+    if (matches) Object.assign(response, this.exec(matches, context));
 
-    return result;
+    return response;
   }
 
   exec(matches, context) {
-    let result = this.handler(matches, context);
-    if (typeof result !== 'object') 
-      result = {output: result};
-    return {matched: true, ...result};
+    let response = this.handler(matches, context);
+    if (typeof response !== 'object') 
+      response = {output: response};
+    return {matched: true, ...response};
   }
 
   get replacer() {
