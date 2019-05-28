@@ -91,7 +91,7 @@ export default class Context {
   }
 
   runLine(text) {
-    return this.addLine(text).result;
+    return this.addLine(text).resultFormatted();
   }
 
   processLines = () => {
