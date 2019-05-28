@@ -1,8 +1,11 @@
+import Unit from './unit';
+
 export default class Line {
   constructor(input) {
     this._input = input;
     this._processed = undefined;
     this._result = undefined;
+    this._units = [];
   }
 
   set input(input) {
@@ -34,8 +37,11 @@ export default class Line {
   }
 
   get result() {
-    this.calculate();
-    return this._result;
+    return this._result || this.calculate();
+  }
+
+  set result(result) {
+    this._result = result;
   }
 
   reset() {
@@ -44,11 +50,11 @@ export default class Line {
   }
 
   resultFormatted() {
-    return this.result || '';
+    return this.format(this.result);
   }
 
   hasResult() {
-    return typeof this.result !== 'undefined';
+    return this.result && typeof this.result !== 'undefined';
   }
 
   isBlank() {
@@ -67,7 +73,8 @@ export default class Line {
   }
 
   calculate() {
-    this._result = this._evaluate();
+    if (!this._result)
+      this._result = this._evaluate();
     return this._result;
   }
 
@@ -83,5 +90,37 @@ export default class Line {
       return `${this.input} => ${this.resultFormatted()}`;
     else
       return this.input;
+  }
+
+  get units() {
+    return this._units || [];
+  }
+
+  set units(units) {
+    this.units = (units) ? units : [];
+  }
+
+  addUnit(unit) {
+    this.units.push(unit);
+  }
+
+  hasUnits() {
+    return this.units.length;
+  }
+
+  srcUnit() {
+    return this.units[0];
+  }
+
+  destUnit() {
+    return this.units[this.units.length-1];
+  }
+
+  unit() {
+    return this.destUnit() || Unit.blank();
+  }
+
+  format(value) {
+    return this.unit().format(value);
   }
 }
