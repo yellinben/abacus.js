@@ -5,21 +5,22 @@ import { terser } from 'rollup-plugin-terser';
 
 const isBrowser = String(process.env.NODE_ENV).includes('browser');
 const isBrowserDev = String(process.env.NODE_ENV).includes('browserdev');
-const isCli = String(process.env.NODE_ENV).includes('cli');
 const isTest = String(process.env.NODE_ENV).includes('cli');
 
-const pathname = isCli ? 'cli/index' : 'index';
-const input = `src/${pathname}.js`;
-const output = isBrowserDev
-	? {file: 'dist/browser.dev.js', name: 'Abacus', format: 'umd', sourcemap: 'inline'}
-: isBrowser
-	? {file: 'dist/browser.js', name: 'Abacus', format: 'umd'}
-: isCli
-	? {file: 'dist/cli.js', name: 'Abacus', format: 'cjs'}
-: [
-	{file: 'dist/index.js', name: 'Abacus', format: 'cjs', sourcemap: 'inline'},
-	{file: 'dist/index.mjs', name: 'Abacus', format: 'esm', sourcemap: 'inline'}
-];
+const name = 'abacus';
+const input = `src/index.js`;
+let output;
+
+if (isBrowserDev) {
+	output = {file: 'dist/browser.dev.js', format: 'umd', sourcemap: 'inline'};
+} else if (isBrowser) {
+	output = {file: 'dist/browser.js', format: 'umd'}
+} else {
+	output = {file: 'dist/index.js', format: 'cjs', sourcemap: 'inline'},
+	output = {file: 'dist/index.mjs', format: 'esm', sourcemap: 'inline'}
+}
+
+output['name'] = name;
 
 const babelPresets = {
 	corejs: 3,
@@ -29,7 +30,8 @@ const babelPresets = {
 	useBuiltIns: 'entry'
 };
 
-if (isTest) babelPresets['modules'] = 'cjs';
+if (isTest) 
+	babelPresets['modules'] = 'cjs';
 
 const plugins = [
 	babel()
@@ -42,45 +44,9 @@ const plugins = [
 			presets: [['@babel/env', babelPresets]]
 		})
 	] : [],
-	isBrowser && !isBrowserDev ? terser() : [],
-	isCli ? [
-		trimUseStrict(),
-		addHashBang()
-	] : []
+	isBrowser && !isBrowserDev ? terser() : []
 );
 
-export default { input, output, plugins };
-
-function modernUMD (name, exportName) {
-	const replacee = `module.exports = ${exportName}`;
-	const replacer = `"object"==typeof self?self.${name}=${exportName}:"object"==typeof module&&module.exports&&(module.exports=${exportName})`;
-
-	return {
-		name: 'modern-umd',
-		renderChunk (code) {
-			return `!function(){${
-				code
-				.replace(/'use strict';\n*/, '')
-				.replace(replacee, replacer)
-			}}()`;
-		}
-	};
-}
-
-function addHashBang () {
-	return {
-		name: 'add-hash-bang',
-		renderChunk (code) {
-			return `#!/usr/bin/env node\n${code}`;
-		}
-	};
-}
-
-function trimUseStrict () {
-	return {
-		name: 'trim-use-strict',
-		renderChunk (code) {
-			return code.replace(/\s*('|")?use strict\1;\s*/, '');
-		}
-	};
-}
+export default { 
+	input, output, plugins 
+};
