@@ -1,20 +1,20 @@
 {
-  "name": "abacus.js",
+  "name": "abacus-js",
   "version": "0.0.1",
   "description": "JavaScript-implementation of abacus, a human calculation language.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "author": "Ben Yellin",
   "license": "MIT",
-  "browser": "browser.js",
-  "module": "index.mjs",
+  "browser": "dist/browser.js",
+  "module": "dist/index.mjs",
   "files": [
-    "browser.dev.js",
-    "browser.dev.js.map",
-    "browser.js",
-    "index.js",
-    "index.js.map",
-    "index.mjs",
-    "index.mjs.map"
+    "dist/browser.dev.js",
+    "dist/browser.dev.js.map",
+    "dist/browser.js",
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/index.mjs",
+    "dist/index.mjs.map"
   ],
   "scripts": {
     "build": "yarn run build:browser && yarn run build:node",
