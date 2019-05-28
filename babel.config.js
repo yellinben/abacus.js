@@ -7,6 +7,7 @@ module.exports = {
 		['@babel/plugin-proposal-export-default-from'],
 		['dynamic-import-node'],
 		['transform-modern-regexp'],
+		["@babel/plugin-transform-named-capturing-groups-regex", {runtime: false}],
 		[require.resolve('babel-plugin-module-resolver'), {
 			root: ["./src/"], alias: {"test": "./test"}
 		}]

@@ -11,16 +11,15 @@ const isTest = String(process.env.NODE_ENV).includes('cli');
 const pathname = isCli ? 'cli/index' : 'index';
 const input = `src/${pathname}.js`;
 const output = isBrowserDev
-	? {file: 'build/browser.dev.js', format: 'cjs', sourcemap: true}
+	? {file: 'dist/browser.dev.js', name: 'Abacus', format: 'umd', sourcemap: 'inline'}
 : isBrowser
-	? {file: 'build/browser.js', format: 'cjs'}
+	? {file: 'dist/browser.js', name: 'Abacus', format: 'umd'}
 : isCli
-	? {file: 'build/cli.js', format: 'cjs'}
+	? {file: 'dist/cli.js', name: 'Abacus', format: 'cjs'}
 : [
-	{file: 'build/index.js', format: 'cjs', sourcemap: true},
-	{file: 'build/index.mjs', format: 'esm', sourcemap: true}
+	{file: 'dist/index.js', name: 'Abacus', format: 'cjs', sourcemap: 'inline'},
+	{file: 'dist/index.mjs', name: 'Abacus', format: 'esm', sourcemap: 'inline'}
 ];
-
 
 const babelPresets = {
 	corejs: 3,
@@ -41,8 +40,7 @@ const plugins = [
 		babel({
 			babelrc: false,
 			presets: [['@babel/env', babelPresets]]
-		}),
-		modernUMD('Abacus', 'Abacus')
+		})
 	] : [],
 	isBrowser && !isBrowserDev ? terser() : [],
 	isCli ? [
