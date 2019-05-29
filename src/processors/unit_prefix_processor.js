@@ -1,24 +1,19 @@
 import Processor from '../processor';
 import Unit from '../unit';
 
-const percentageUnit = Unit.withSuffix('%', {name: 'percentage'});
-
-export default class UnitSuffixProcessor extends Processor {
+export default class UnitPrefixProcessor extends Processor {
   constructor() {
     super({
-        match: /(\b-?[0-9.]+)(\s*(?<unit>[a-z]+)|(?<symbol>[^\d\s().]))/gi,
+        match: /[^0-9\s*/%&()<>.+-][0-9.]+/gi,
         priority: 4
       }, ({matches, input}) => {
         let tokens = input.split(' ');
         let units = [];
 
         for (let match of matches) {
-          let val = parseFloat(match);
+          const val = match.match(/[0-9.]+/)[0];
           const suffix = match.replace(val, '').trim();
-          units.push(Unit.withSuffix(suffix));
-
-          if (suffix === '%')
-            val = `(${val}/100)`;
+          units.push(Unit.withPrefix(suffix));
           
           tokens = tokens.map(token => (
             (token === match) ? val : token
