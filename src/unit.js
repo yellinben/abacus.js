@@ -43,11 +43,15 @@ export default class Unit {
     );
   }
 
+  static byName(name) {
+    return Unit.registry[name] || 
+      Object.values(Unit.registry)
+      .find(unit => unit.name === name);
+  }
+
   static blank() {
-    return (
-      Unit.registry['blank'] ||
-      new Unit({name: 'blank'})
-    );
+    return Unit.byName('blank') ||
+      new Unit({name: 'blank'});
   }
 
   static abbreviation(unit) {
@@ -66,12 +70,16 @@ export default class Unit {
       name: undefined,
       category: undefined,
       prefix: undefined,
-      suffix: undefined
+      suffix: undefined,
+      formatter: undefined
     }, opts);
 
     if (!this.name)
       this.name = this.abbreviations()[0];
     
+    if (!this.formatter)
+      this.formatter = this._defaultFormatter;
+
     Unit.register(this);
   }
 
@@ -102,6 +110,10 @@ export default class Unit {
   }
 
   format(value) {
+    return this.formatter(value);
+  }
+
+  _defaultFormatter(value) {
     return [
       this.prefixFormatted(), 
       value.toString(),
@@ -134,3 +146,13 @@ export default class Unit {
     }
   }
 }
+
+new Unit({
+  name: 'percentage',
+  suffix: '%',
+  formatter: (value) => `${value * 100}%`
+});
+
+new Unit({
+  name: 'blank'
+});

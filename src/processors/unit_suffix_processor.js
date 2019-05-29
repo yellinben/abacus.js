@@ -1,8 +1,6 @@
 import Processor from '../processor';
 import Unit from '../unit';
 
-const percentageUnit = Unit.withSuffix('%', {name: 'percentage'});
-
 export default class UnitSuffixProcessor extends Processor {
   constructor() {
     super({
