@@ -1,4 +1,7 @@
 import Processor from '../processor';
+import Unit from '../unit';
+
+const unit = Unit.withSuffix('%', {name: 'percentage'});
 
 export default class PercentageProcessor extends Processor {
   constructor() {
@@ -27,7 +30,7 @@ export default class PercentageProcessor extends Processor {
             break;
         }
 
-        return {output};
+        return {output, unit};
       },
     );
   }

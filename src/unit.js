@@ -1,7 +1,13 @@
 import convert from 'convert-units';
 
+import { 
+  isMathematicalSuffix,
+  isMeasurementTerm
+} from './utils';
+
 export default class Unit {
   static registry = {};
+  static convert = convert;
 
   static registerAbbreviation(abbr, unit) {
     Unit.registry[abbr] = unit;
@@ -14,8 +20,34 @@ export default class Unit {
     });
   }
 
-  static get(abbreviation) {
+  static find(abbreviation) {
     return Unit.registry[abbreviation];
+  }
+
+  static get(unit) {
+    if (Unit.isUnit(unit)) return unit;
+    return Unit.find(unit) || Unit.withSuffix(unit);
+  }
+
+  static withPrefix(prefix, opts = {}) {
+    return (
+       Unit.registry[prefix] || 
+       new Unit({prefix, ...opts})
+    );
+  }
+
+  static withSuffix(suffix, opts = {}) {
+    return (
+       Unit.registry[suffix] || 
+       new Unit({suffix, ...opts})
+    );
+  }
+
+  static blank() {
+    return (
+      Unit.registry['blank'] ||
+      new Unit({name: 'blank'})
+    );
   }
 
   static abbreviation(unit) {
@@ -23,6 +55,10 @@ export default class Unit {
       return unit.abbreviation();
     else
       return unit;
+  }
+
+  static isUnit(unit) {
+    return unit && unit.constructor.name === 'Unit';
   }
 
   constructor(opts) {
@@ -39,27 +75,6 @@ export default class Unit {
     Unit.register(this);
   }
 
-  static withPrefix(prefix) {
-    return (
-       Unit.registry[prefix] || 
-       new Unit({prefix})
-    );
-  }
-
-  static withSuffix(suffix) {
-    return (
-       Unit.registry[suffix] || 
-       new Unit({suffix})
-    );
-  }
-
-  static blank() {
-    return (
-      Unit.registry['blank'] ||
-      new Unit({name: 'blank'})
-    );
-  }
-
   abbreviations() {
     return [this.prefix, this.suffix]
       .filter(Boolean);
@@ -69,18 +84,47 @@ export default class Unit {
     return this.abbreviations()[0];
   }
 
-  format(value) {
-    if (!value !== 0 && !value)
-      return;
-    else if (this.prefix)
-      return `${this.prefix}${value}`;
-    else if (this.suffix)
-      return `${value} ${this.suffix}`;
+  isMeasurement() {
+    return isMeasurementTerm(this.abbreviation());
+  }
+
+  isMathematical() {
+    return isMathematicalSuffix(this.abbreviation());
+  }
+
+  type() {
+    if (this.isMathematical())
+      return 'math';
+    else if (this.isMeasurement())
+      return 'measurement';
     else
-      return value.toString();
+      return false;
+  }
+
+  format(value) {
+    return [
+      this.prefixFormatted(), 
+      value.toString(),
+      this.suffixFormatted()
+    ].join('');
+  }
+
+  prefixFormatted() {
+    return `${this.prefix || ''}`;
+  }
+
+  suffixFormatted() {
+    if (!this.suffix) return '';
+    const padding = this.isMathematical() ? '' : ' ';
+    return `${padding}${this.suffix || ''}`;
   }
 
   convert(value, destUnit) {
+    if (this.isMathematical()) {
+      const destMathUnit = Unit.withSuffix(destUnit);
+      return destMathUnit.format(value);
+    }
+
     try {
       return convert(value)
         .from(this.abbreviation())

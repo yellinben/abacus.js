@@ -90,7 +90,7 @@ export default class Context {
     return this.addLines(lines);
   }
 
-  runLine(text) {
+  eval(text) {
     return this.addLine(text).resultFormatted();
   }
 
@@ -131,8 +131,11 @@ export default class Context {
       if ('result' in response) 
         lineData._result = response.result;
 
+      if ('unit' in response)
+        line.addUnit(response.unit);
+
       if ('units' in response)
-        lineData._units = response.units;
+        line.addUnits(response.units);
     });
 
     lineData._processed = lineValue;

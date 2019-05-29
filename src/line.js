@@ -5,7 +5,7 @@ export default class Line {
     this._input = input;
     this._processed = undefined;
     this._result = undefined;
-    this._units = [];
+    this.units = [];
   }
 
   set input(input) {
@@ -92,20 +92,13 @@ export default class Line {
       return this.input;
   }
 
-  get units() {
-    return this._units || [];
+  addUnit = (unit) => {
+    if (!this.units) this.units = [];
+    this.units.push(Unit.get(unit));
   }
 
-  set units(units) {
-    this.units = (units) ? units : [];
-  }
-
-  addUnit(unit) {
-    this.units.push(unit);
-  }
-
-  hasUnits() {
-    return this.units.length;
+  addUnits = (...units) => {
+    [...units.flat()].forEach(this.addUnit);
   }
 
   srcUnit() {
