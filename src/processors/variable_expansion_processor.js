@@ -5,9 +5,9 @@ export default class VariableExpansionProcessor extends Processor {
   constructor() {
     super({
       priority: 5
-    }, (matches, context) => {
+    }, ({input}, context) => {
       const replacer = new TokenReplacer(context.variableResults());
-      return {output: replacer.run(matches.input)};
+      return {output: replacer.run(input)};
     });
   }
 }

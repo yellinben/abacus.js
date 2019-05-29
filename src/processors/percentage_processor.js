@@ -10,7 +10,7 @@ export default class PercentageProcessor extends Processor {
         reserved: ['of', 'off', 'on'],
         priority: 2
       },
-      (matches) => {
+      ({matches}) => {
         const percentage = parseFloat(matches[1]);
         const operator = matches[2];
 

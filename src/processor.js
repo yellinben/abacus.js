@@ -54,8 +54,8 @@ export default class Processor {
   }
 
   matchInput(input) {
-    const match = this.matchTest(`${input}`);
-    if (match) return {...match, input};
+    const matches = this.matchTest(`${input}`);
+    if (matches) return {matches, input};
   }
 
   run(text, context) {

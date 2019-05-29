@@ -6,8 +6,7 @@ export default class VariableAssignmentProcessor extends Processor {
         match: /(?<var>[\w]+) = (?<expr>.*)/,
         reserved: ['='],
         priority: 0,
-      },
-      (matches) => ({
+      }, ({matches}) => ({
         output: matches[2], 
         variable: matches[1]
       }),
