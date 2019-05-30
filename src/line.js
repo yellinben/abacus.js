@@ -1,4 +1,5 @@
 import Unit from './unit';
+import calc from './calculator';
 
 export default class Line {
   constructor(input) {
@@ -79,10 +80,8 @@ export default class Line {
   }
 
   _evaluate() {
-    // [very bad] replace with 
-    // actual arithmetic parser
     if (this.isCalculatable())
-      return eval(this.value);
+      return calc(this.value);
   }
 
   print() {
