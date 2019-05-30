@@ -21,7 +21,9 @@ export default class Context {
   }
 
   static registerProcessors(...processors) {
-    processors.flat().forEach(p => Context.registerProcessor(p));
+    processors.flat().forEach(processor => {
+      Context.registerProcessor(processor);
+    });
   }
 
   static allProcessors() {
@@ -77,7 +79,7 @@ export default class Context {
   addLines(...lines) {
     const prevLength = this.lines.length;
 
-    [...lines].flat().forEach(input => {
+    lines.flat().forEach(input => {
       return this.insertLine(input)
     });
 
@@ -90,8 +92,27 @@ export default class Context {
     return this.addLines(lines);
   }
 
+  removeLine(line, reprocess = true) {
+    this.removeLineVariables(line);
+    this.lines = this.lines.filter(l => l !== line);
+
+    if (reprocess)
+      this.processLines();
+    return line;
+  }
+
+  removeLines(...lines) {
+    lines.flat().forEach(line => {
+      this.removeLine(line, false);
+    });
+
+    this.processLines();
+    return lines.flat();
+  }
+
   eval(text) {
-    return this.addLine(text).resultFormatted();
+    return this.addLine(text)
+      .resultFormatted();
   }
 
   processLines = () => {
@@ -175,6 +196,7 @@ export default class Context {
   setVariables(vars) {
     this.variables = {...this.variables, ...vars};
   }
+
   setVars(...vars) {
     if (vars && vars.length == 2 && typeof vars[0] == 'string')
       this.setVariable(vars[0], vars[1]);
@@ -187,11 +209,37 @@ export default class Context {
   }
 
   getVariables(...names) {
-    return [...names].map(name => this.getVariable(name));
+    return names.flat().map(name => {
+      return this.getVariable(name);
+    });
   }
 
   hasVariable(name) {
     return !!this.getVariable(name);
+  }
+
+  removeVariable(name) {
+    if (name in this.variables)
+      delete this.variables[name];
+  }
+
+  removeVariables(...variables) {
+    variables.flat().forEach(name => {
+      this.removeVariable(name);
+    });
+  }
+
+  removeLineVariables(line) {
+    this.lineVariables(line).forEach(name => {
+      this.removeVariable(name);
+    })
+  }
+
+  lineVariables(line) {
+    return Object.keys(this.variables)
+      .filter(name => {
+        return this.variables[name] === line;
+    });
   }
 
   variableExpression(name) {
@@ -244,6 +292,19 @@ export default class Context {
 
   output() {
     return this.outputLines().join('\n');
+  }
+
+  reset() {
+    this._resetVariables();
+    this._resetLines();
+  }
+
+  _resetLines() {
+    this.lines = [];
+  }
+
+  _resetVariables() {
+    this.variables = {};
   }
 }
 
