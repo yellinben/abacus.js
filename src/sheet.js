@@ -1,5 +1,5 @@
 import Context from './context';
-import { parseJSON } from './utils';
+import { parseJSON, slugify } from './utils';
 
 export default class Sheet {
   constructor(opts = {}, contents = []) {
@@ -10,7 +10,7 @@ export default class Sheet {
 
     Object.assign(this, {
       id: 0,
-      title: "untitled",
+      title: undefined,
       author: undefined,
       format: undefined,
       created: new Date(),
@@ -21,6 +21,10 @@ export default class Sheet {
     
     if (contents && contents.length)
       this._setContents(contents);
+  }
+
+  slug() {
+    return slugify(this.title);
   }
 
   get contents() {
@@ -74,6 +78,7 @@ export default class Sheet {
     return {
       id: this.id,
       title: this.title,
+      slug: this.slug(),
       author: this.author,
       format: this.format,
       created: this.created.toISOString(),
@@ -84,10 +89,11 @@ export default class Sheet {
   }
 
   static fromJSON(json) {
-    // remove lines before deserialization
-    // this is recalculated dynamically from contents
+    // remove dynamic content before deserialization
     const obj = parseJSON(json);
     delete obj['lines'];
+    delete obj['slug'];
+
     return new Sheet(obj);
   }
 }

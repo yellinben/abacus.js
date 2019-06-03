@@ -38,8 +38,12 @@ export default class Notebook {
     return this.sheets.map(sheet => sheet.title);
   }
 
-  findSheet(title) {
+  find(title) {
     return this.sheets.find(sheet => sheet.title === title);
+  }
+
+  get(slug) {
+    return this.sheets.find(sheet => sheet.slug() === slug);
   }
 
   _titleExists(title) {
