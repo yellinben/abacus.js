@@ -1,6 +1,6 @@
 import Context from './context';
 
-export default class Document {
+export default class Sheet {
   constructor(opts = {}, contents = []) {
     if ('contents' in opts) {
       contents = opts['contents'];
