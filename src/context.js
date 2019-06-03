@@ -64,6 +64,11 @@ export default class Context {
     return line;
   }
 
+  setLines(...lines) {
+    this.reset();
+    return this.addLines(lines);
+  }
+
   addLine(input) {
     const line = this.insertLine(input);
     this.processLine(line);
@@ -85,11 +90,6 @@ export default class Context {
 
     this.processLines();
     return this.lines.slice(prevLength);
-  }
-
-  addText(text) {
-    const lines = (text || '').split('\n');
-    return this.addLines(lines);
   }
 
   removeLine(line, reprocess = true) {
@@ -292,6 +292,20 @@ export default class Context {
 
   output() {
     return this.outputLines().join('\n');
+  }
+
+  get content() {
+    return this.inputLines().join('\n');
+  }
+
+  set content(text) {
+    this.reset();
+    this.addContent(text);
+  }
+
+  addContent(text) {
+    const lines = (text || '').split('\n');
+    return this.addLines(lines);
   }
 
   reset() {
