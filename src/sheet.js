@@ -10,9 +10,10 @@ export default class Sheet {
     Object.assign(this, {
       id: 0,
       title: "untitled",
+      author: undefined,
       format: undefined,
-      created_at: undefined,
-      updated_at: undefined
+      created: new Date(),
+      updated: new Date()
     }, opts);
 
     this._context = new Context();
@@ -29,10 +30,6 @@ export default class Sheet {
     this._setContents(contents);
   }
 
-  _setContents(contents) {
-    this._context.setLines(...contents.flat());
-  }
-
   get text() {
     return this.contents.join('\n');
   }
@@ -41,12 +38,23 @@ export default class Sheet {
     this.contents = text.split('\n');
   }
 
+  _setContents(contents) {
+    this._updateTimestamp();
+    this._context.setLines(...contents.flat());
+  }
+
   add(...inputLines) {
+    this._updateTimestamp();
     return this._context.addLines(inputLines);
   }
 
   write(text) {
+    this._updateTimestamp();
     return this.add(text.split('\n'));
+  }
+
+  _updateTimestamp() {
+    this.updated = new Date();
   }
 
   get lines() {
@@ -59,5 +67,18 @@ export default class Sheet {
         result_formatted: line.resultFormatted()
       }
     });
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      title: this.title,
+      author: this.author,
+      format: this.format,
+      created: this.created.toISOString(),
+      updated: this.updated.toISOString(),
+      contents: this.contents,
+      lines: this.lines
+    };
   }
 }

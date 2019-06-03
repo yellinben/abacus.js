@@ -145,6 +145,20 @@ export default class Unit {
       console.error(error);
     }
   }
+
+  toString() {
+    return this.name;
+  }
+
+  toJSON() {
+    return {
+      name: this.name,
+      prefix: this.prefix,
+      suffix: this.suffix,
+      category: this.category,
+      abbreviation: this.abbreviation()
+    }
+  }
 }
 
 new Unit({

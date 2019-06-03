@@ -115,4 +115,14 @@ export default class Line {
   format(value) {
     return this.unit().format(value);
   }
+
+  toJSON() {
+    return {
+      input: this.input,
+      processed: this.processed,
+      result: this.result,
+      resultFormatted: this.resultFormatted,
+      units: this.units.map(u => u.toString())
+    };
+  }
 }
