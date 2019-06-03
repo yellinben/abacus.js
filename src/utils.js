@@ -1,5 +1,9 @@
 import convert from 'convert-units';
 
+export const parseJSON = (json) => {
+  return (typeof json === 'string') ? JSON.parse(json) : json;
+}
+
 export const isMathematicalSuffix = (symbol) => {
   // right now just detect percentages
   return symbol && /^[%]$/.test(symbol);

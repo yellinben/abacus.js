@@ -1,4 +1,5 @@
 import Context from './context';
+import { parseJSON } from './utils';
 
 export default class Sheet {
   constructor(opts = {}, contents = []) {
@@ -80,5 +81,13 @@ export default class Sheet {
       contents: this.contents,
       lines: this.lines
     };
+  }
+
+  static fromJSON(json) {
+    // remove lines before deserialization
+    // this is recalculated dynamically from contents
+    const obj = parseJSON(json);
+    delete obj['lines'];
+    return new Sheet(obj);
   }
 }

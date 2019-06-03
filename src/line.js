@@ -1,5 +1,6 @@
 import Unit from './unit';
 import calc from './calculator';
+import { parseJSON } from './utils';
 
 export default class Line {
   constructor(input) {
@@ -116,6 +117,10 @@ export default class Line {
     return this.unit().format(value);
   }
 
+  toString() {
+    return this.value;
+  }
+
   toJSON() {
     return {
       input: this.input,
@@ -124,5 +129,9 @@ export default class Line {
       resultFormatted: this.resultFormatted,
       units: this.units.map(u => u.toString())
     };
+  }
+
+  static fromJSON(json) {
+    return new Line(parseJSON(json));
   }
 }
