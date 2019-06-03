@@ -116,7 +116,7 @@ export default class Unit {
   _defaultFormatter(value) {
     return [
       this.prefixFormatted(), 
-      value.toString(),
+      value,
       this.suffixFormatted()
     ].join('');
   }
