@@ -1,5 +1,5 @@
 import Context from './context';
-import { parseJSON, slugify } from './utils';
+import { parseJSON, slugify, uniqueId } from './utils';
 
 export default class Sheet {
   constructor(opts = {}, contents = []) {
@@ -9,7 +9,7 @@ export default class Sheet {
     }
 
     Object.assign(this, {
-      id: 0,
+      id: uniqueId(),
       title: undefined,
       author: undefined,
       format: undefined,

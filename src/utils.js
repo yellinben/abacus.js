@@ -1,4 +1,19 @@
+import { ulid } from 'ulid';
 import convert from 'convert-units';
+
+export const unique = (...arr) => {
+  return [...new Set(arr.flat())];
+}
+
+export const uniqueId = (seed) => {
+  return ulid(seed).toLowerCase();
+}
+
+export const isValidId = (id) => {
+  return typeof id === 'string' 
+    && id.length === 26 
+    && !/[^a-zA-Z0-9]/.test(id)
+}
 
 export const parseJSON = (json) => {
   return (typeof json === 'string') ? JSON.parse(json) : json;

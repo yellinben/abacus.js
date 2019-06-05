@@ -1,19 +1,40 @@
 import Sheet from './sheet';
+import { isValidId, unique } from './utils';
 
 export default class Notebook {
   static DEFAULT_TITLE = 'Untitled';
 
   constructor(opts = {}) {
+    if ('sheets' in opts && Array.isArray(opts.sheets)) {
+      opts.sheets = opts.sheets.flat()
+        .reduce((sheets, sheet) => {
+          sheets[sheet.id] = sheet;
+      }, {});
+    }
+
     Object.assign(this, {
-      sheets: [],
+      sheets: {},
       author: undefined
     }, opts);
+
+    if (!this.author && this.hasSheets())
+      this.author = this.authors()[0];
+  }
+
+  static withSheets(...sheets) {
+    return new Notebook({sheets: [...sheets.flat()]});
+  }
+
+  allSheets(sort = 'id') {
+    return Object.values(this.sheets).sort((sheetA, sheetB) => { 
+      const sortA = sheetA[sort].toString();
+      const sortB = sheetB[sort].toString();
+      return sortB.localeCompare(sortA);
+    });
   }
 
   recentSheets() {
-    return this.sheets.sort((sheetA, sheetB) => (
-      sheetB.updated - sheetA.updated
-    ));
+    return this.allSheets('updated');
   }
 
   latestSheet() {
@@ -21,29 +42,72 @@ export default class Notebook {
       return this.recentSheets()[0];
   }
 
+  findSheet(sheet) {
+    if (sheet instanceof Sheet)
+      return sheet;
+    else if (typeof sheet === 'number') 
+      return this.findByRecent(sheet);
+    else if (isValidId(sheet))
+      return this.findById(sheet);
+    else if (sheet)
+      return this.findByTitle(sheet);
+  }
+
+  findById(id) {
+    return this.sheets[id];
+  }
+
+  findByTitle(title, searchSlug = true) {
+    return this.recentSheets().find(sheet => {
+      return sheet.title === title || 
+        (searchSlug && sheet.slug() === title);
+    });
+  }
+
+  findByRecent(index) {
+    // supports negative index
+    const recent = this.recentSheets();
+    return recent[(index >= 0) ? index :
+      recent.length - index];
+  }
+
+  hasSheets() {
+    return this.ids().length > 0;
+  }
+
   newSheet(title = this._defaultTitle()) {
     const sheet = new Sheet({
       title, author: this.author
     });
-    this.sheets.push(sheet);
+
+    this.sheets[sheet.id] = sheet;
     return sheet;
   }
 
   removeSheet(sheet) {
-    const title = (sheet instanceof Sheet) ? sheet.title : sheet;
-    this.sheets = this.sheets.filter(s => s.title === title);
+    const sheetObj = this.findSheet(sheet);
+    if (sheetObj.id in this.sheets)
+      delete this.sheets[sheetObj.id];
+  }
+
+  ids() {
+    return Object.keys(this.sheets);
   }
 
   titles() {
-    return this.sheets.map(sheet => sheet.title);
+    return this._sheetMap('title');
   }
 
-  find(title) {
-    return this.sheets.find(sheet => sheet.title === title);
+  slugs() {
+    return this._sheetMap('slugs');
   }
 
-  get(slug) {
-    return this.sheets.find(sheet => sheet.slug() === slug);
+  authors() {
+    return unique(this._sheetMap('author', 'updated'));
+  }
+  
+  _sheetMap(prop, sort = undefined) {
+    return this.allSheets(sort).map(sheet => sheet[prop]);
   }
 
   _titleExists(title) {
@@ -60,5 +124,9 @@ export default class Notebook {
     }
 
     return title;
+  }
+
+  _author() {
+    return this.authors()[0];
   }
 }
