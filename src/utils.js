@@ -58,3 +58,8 @@ export const slugify = (str) => {
     .replace(/^-+/, '') // Trim - from start of text
     .replace(/-+$/, '') // Trim - from end of text
 }
+
+export const isValidSlug = (slug) => {
+  return typeof slug === 'string' 
+    && /^[\w-]+$/.test(slug)
+}
