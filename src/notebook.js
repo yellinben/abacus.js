@@ -125,8 +125,4 @@ export default class Notebook {
 
     return title;
   }
-
-  _author() {
-    return this.authors()[0];
-  }
 }
