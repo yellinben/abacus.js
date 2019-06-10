@@ -1,6 +1,32 @@
 import { ulid } from 'ulid';
 import convert from 'convert-units';
 
+export const isNull = (obj) => obj === null;
+export const isUndefined = (obj) => obj === null;
+export const isUndefinedOrNull = (obj) => isUndefined(obj) || isNull(obj);
+
+export const notNull = (obj) => ! isNull(obj);
+export const notUndefined = (obj) => ! isUndefined(obj);
+export const notUndefinedOrNull = (obj) => !isUndefinedOrNull(obj);
+
+export const objLength = (obj, trim = true) => {
+  if (isUndefinedOrNull(obj))
+    return -1;
+  else if (typeof obj === 'string' && trim)
+    return obj.trim().length;
+  else if (Array.isArray(obj) && trim)
+    return objLength(obj.filter(Boolean));
+  else if (obj.hasOwnProperty('length'))
+    return obj.length;
+  else if (typeof obj === 'object')
+    return objLength(Object.values(obj), trim);
+  else
+    return -1;
+}
+
+export const isEmpty = (obj) => objLength(obj) > 0;
+export const notEmpty = (obj) => !isEmpty(obj);
+
 export const unique = (...arr) => {
   return [...new Set(arr.flat())];
 }
