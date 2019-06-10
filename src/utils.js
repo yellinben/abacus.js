@@ -89,3 +89,17 @@ export const isValidSlug = (slug) => {
   return typeof slug === 'string' 
     && /^[\w-]+$/.test(slug)
 }
+
+export const toDate = (date = undefined, defaultNow = true) => {
+  if (date instanceof Date)
+    return date;
+  else if (date && date.length)
+    return new Date(date);
+  else if (defaultNow)
+    return new Date();
+}
+
+export const toDateISO = (date = undefined, defaultNow = undefined) => {
+  if (!date && !defaultNow) return;
+  return toDate(date, defaultNow).toISOString();
+}
