@@ -3,11 +3,12 @@ import calc from './calculator';
 import { parseJSON } from './utils';
 
 export default class Line {
-  constructor(input) {
+  constructor(input, context = undefined) {
     this._input = input;
     this._processed = undefined;
     this._result = undefined;
     this.units = [];
+    this.context = context;
   }
 
   set input(input) {
@@ -83,6 +84,29 @@ export default class Line {
   _evaluate() {
     if (this.isCalculatable())
       return calc(this.value);
+  }
+
+  process() {
+    if (this.context) {
+      this.context.processLine(this);
+    } else {
+      throw new Error('Missing line context');
+    }
+  }
+
+  index() {
+    return (this.context) 
+      ? this.context.lineIndex(this) 
+      : -1;
+  }
+
+  number() {
+    return this.index() + 1;
+  }
+
+  remove() {
+    if (this.context)
+      return this.context.removeLine(this);
   }
 
   print() {

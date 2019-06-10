@@ -1,26 +1,27 @@
 import Context from './context';
-import { parseJSON, slugify, uniqueId } from './utils';
+
+import { 
+  parseJSON, 
+  slugify, uniqueId, 
+  toDateISO, toDate 
+} from './utils';
 
 export default class Sheet {
   constructor(opts = {}, contents = []) {
-    if ('contents' in opts) {
-      contents = opts['contents'];
-      delete opts['contents'];
+    if (contents && typeof contents === 'string') {
+      opts['text'] = contents;
+    } else if (Array.isArray(contents)) {
+      opts['contents'] = contents;
     }
 
-    Object.assign(this, {
-      id: uniqueId(),
-      title: undefined,
-      author: undefined,
-      format: undefined,
-      created: new Date(),
-      updated: new Date()
-    }, opts);
-
     this._context = new Context();
-    
-    if (contents && contents.length)
-      this._setContents(contents);
+
+    Object.assign(this, {
+      id: uniqueId(), notebook: undefined,
+      title: undefined, author: undefined,
+      created: toDate(opts['created']),
+      updated: toDate(opts['updated']),
+    }, opts);
   }
 
   slug() {
@@ -43,7 +44,7 @@ export default class Sheet {
     this.contents = text.split('\n');
   }
 
-  _setContents(contents) {
+  _setContents(...contents) {
     this._updateTimestamp();
     this._context.setLines(...contents.flat());
   }
@@ -62,16 +63,32 @@ export default class Sheet {
     this.updated = new Date();
   }
 
+  results() {
+    return this._context.resultsFormatted();
+  }
+
   get lines() {
-    return this._context.lines.map(line => {
-      return {
+    return this._context.lines
+      .map(line => ({
         input: line.input,
         expression: line.processed,
         mode: "calculation",
         result: line.result,
-        result_formatted: line.resultFormatted()
-      }
-    });
+        resultFormatted: line.resultFormatted()
+      })
+    );
+  }
+
+  save() {
+    if (this.notebook) this.notebook.save(this);
+  }
+
+  update(contents) {
+    if (typeof contents === 'string')
+      this.text = contents;
+    else
+      this.contents = contents;    
+    this.save();
   }
 
   toJSON() {
@@ -80,20 +97,58 @@ export default class Sheet {
       title: this.title,
       slug: this.slug(),
       author: this.author,
-      format: this.format,
-      created: this.created.toISOString(),
-      updated: this.updated.toISOString(),
+      created: toDateISO(this.created),
+      updated: toDateISO(this.updated),
       contents: this.contents,
-      lines: this.lines
+      text: this.text
+    };
+  }
+
+  static toJSON(sheet) {
+    return {
+      id: sheet.id,
+      title: sheet.title,
+      slug: sheet.slug(),
+      author: sheet.author,
+      created: sheet.created.toISOString(),
+      updated: sheet.updated.toISOString(),
+      text: sheet.text
     };
   }
 
   static fromJSON(json) {
-    // remove dynamic content before deserialization
-    const obj = parseJSON(json);
-    delete obj['lines'];
-    delete obj['slug'];
+    const data = parseJSON(json);
+    let sheet;
 
-    return new Sheet(obj);
+    if (typeof data === 'string') {
+      sheet = new Sheet();
+      sheet.text = data;
+      return sheet;
+    } else if (Array.isArray(data)) {
+      sheet = new Sheet();
+      sheet.contents = data;
+      return sheet;
+    } else if (typeof data !== 'object') {
+      return new Sheet();
+    }
+
+    let {
+      id, title, author,
+      created, updated,
+      text, contents
+    } = data;
+
+    sheet = new Sheet({ 
+      id, title, author,
+      created, updated
+    });
+    
+    if (contents && contents.length > 0) {
+      sheet.contents = contents;
+    } else if (text && text.length > 0) {
+      sheet.text = text;
+    }
+    
+    return sheet;
   }
 }

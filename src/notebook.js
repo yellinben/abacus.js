@@ -1,5 +1,9 @@
 import Sheet from './sheet';
-import { isValidId, unique } from './utils';
+
+import { 
+  parseJSON, unique,
+  isValidId, uniqueId
+} from './utils';
 
 export default class Notebook {
   static DEFAULT_TITLE = 'Untitled';
@@ -13,8 +17,10 @@ export default class Notebook {
     }
 
     Object.assign(this, {
+      id: uniqueId(),
       sheets: {},
-      author: undefined
+      author: undefined,
+      service: undefined
     }, opts);
 
     if (!this.author && this.hasSheets())
@@ -38,8 +44,12 @@ export default class Notebook {
   }
 
   latestSheet() {
-    if (this.sheets && this.sheets.length)
+    if (this.hasSheets()) 
       return this.recentSheets()[0];
+  }
+
+  lastUpdated() {
+    return (this.latestSheet() || {})['updated'];
   }
 
   findSheet(sheet) {
@@ -77,9 +87,10 @@ export default class Notebook {
 
   newSheet(title = this._defaultTitle()) {
     const sheet = new Sheet({
-      title, author: this.author
+      title, author: this.author,
+      notebook: this
     });
-
+    
     this.sheets[sheet.id] = sheet;
     return sheet;
   }
@@ -90,8 +101,26 @@ export default class Notebook {
       delete this.sheets[sheetObj.id];
   }
 
+  setSheet = (sheet) => {
+    if (sheet && 'id' in sheet)
+      this.sheets[sheet.id] = sheet;
+  }
+
+  addSheets(...sheets) {
+    sheets.flat().forEach(this.setSheet);
+  }
+
+  addSheet(sheet) {
+    if (this.sheets[sheet.id] && this.sheets[sheet.id] !== sheet)
+      this.sheets[sheet.id] = sheet;
+  }
+
   ids() {
     return Object.keys(this.sheets);
+  }
+
+  recentIds() {
+    return this._sheetMap('id', 'updated');
   }
 
   titles() {
@@ -124,5 +153,38 @@ export default class Notebook {
     }
 
     return title;
+  }
+
+  save(sheets = this.allSheets()) {
+    if (this.service) this.service.save(sheets);
+  }
+
+  toJSON(includeSheets = true) {
+    const json = {
+      id: this.id,
+      author: this.author,
+      updated: this.lastUpdated(),
+      recentSheetIds: this.recentIds()
+    };
+
+    if (includeSheets) {
+      json['sheets'] = this.sheets.reduce((acc, sheet) => {
+        acc[sheet.id] = sheet.toJSON(); return acc;
+      }, {});
+    }
+
+    return json;
+  }
+
+  static fromJSON(json) {
+    let { id, author, sheets } = parseJSON(json);
+
+    if (typeof sheets === 'object') {
+      sheets = Object.values(sheets);
+    }
+    
+    return new Notebook({id, author, 
+      sheets: sheets.map(Sheet.fromJSON)
+    });
   }
 }

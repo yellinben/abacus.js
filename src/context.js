@@ -1,5 +1,6 @@
 import Line from './line';
 import processors from './processors/index';
+import { unique } from './utils';
 
 export default class Context {
   static processors = [];
@@ -8,6 +9,10 @@ export default class Context {
   constructor() {
     this.lines = [];
     this.variables = {};
+    this.isProcessed = false;
+    this.subscriptions = [];
+    this.previousText = undefined;
+    this.processedAt = undefined;
   }
 
   static registerProcessor(processor) {
@@ -37,7 +42,7 @@ export default class Context {
       ...new Set([...Context.reservedWords, ...reserved]),
     ];
   }
-
+  
   get processors() {
     return Context.processors;
   }
@@ -46,8 +51,12 @@ export default class Context {
     return Context.allProcessors();
   }
 
+  _newLine(input) {
+    return new Line(input, this);
+  }
+
   insertLine(input) {
-    const line = new Line(input);
+    const line = this._newLine(input);
     this.lines.push(line);
     return line;
   }
@@ -58,7 +67,7 @@ export default class Context {
       line = this.lines[index].input;
       line = input;
     } else {
-      line = new Line(input);
+      line = this._newLine(input);
       this.lines[index] = line;
     }
     return line;
@@ -110,15 +119,42 @@ export default class Context {
     return lines.flat();
   }
 
+  lineIndex(line) {
+    return this.lines.indexOf(line);
+  }
+
   eval(text) {
     return this.addLine(text)
       .resultFormatted();
   }
 
+  isUnprocessed() {
+    return !this.isProcessed;
+  }
+
+  hasTextChanged() {
+    return this.previousText !== this.text;
+  }
+
+  shouldProcess() {
+    return this.isUnprocessed 
+      && this.hasTextChanged();
+  }
+
   processLines = () => {
+    if (!this.shouldProcess()) {
+      console.warn('should not process');
+      return;
+    }
+
+    this.isProcessed = false;
+
     this.lines.forEach((line, index) => {
       this.processLine(line, index);
     });
+
+    this.isProcessed = true;
+    this.processedAt = new Date();
   }
 
   processLine = (line, index) => {
@@ -183,10 +219,10 @@ export default class Context {
   }
 
   reservedWords() {
-    return [...new Set([
+    return unique(
       ...Context.reservedWords, 
       Object.keys(this.variables)
-    ])];
+    );
   }
 
   setVariable(name, value) {
@@ -286,6 +322,10 @@ export default class Context {
     return this.resultLines().filter(Boolean);
   }
 
+  resultsFormatted() {
+    return this.lines.map(line => line.resultFormatted());
+  }
+
   outputLines() {
     return this.lines.map(line => line.print());
   }
@@ -294,21 +334,23 @@ export default class Context {
     return this.outputLines().join('\n');
   }
 
-  get content() {
+  get text() {
     return this.inputLines().join('\n');
   }
 
-  set content(text) {
+  set text(text) {
     this.reset();
-    this.addContent(text);
+    this.addText(text);
   }
 
-  addContent(text) {
+  addText(text) {
     const lines = (text || '').split('\n');
     return this.addLines(lines);
   }
 
   reset() {
+    this.previousText = this.text;
+    this.isProcessed = false;
     this._resetVariables();
     this._resetLines();
   }
