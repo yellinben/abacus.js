@@ -41,7 +41,7 @@ export default class Sheet {
   }
 
   set text(text) {
-    this.contents = text.split('\n');
+    this.contents = (text || "").split('\n');
   }
 
   _setContents(...contents) {
@@ -115,7 +115,6 @@ export default class Sheet {
   }
 
   static toJSON(sheet) {
-    console.log('[toJSON]', sheet);
     return {
       id: sheet.id,
       title: sheet.title,
@@ -132,7 +131,6 @@ export default class Sheet {
 
     const data = parseJSON(json);
     let sheet;
-    console.log('[fromJSON]', data);
 
     if (typeof data === 'string') {
       sheet = new Sheet();

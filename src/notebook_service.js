@@ -1,6 +1,5 @@
 import Notebook from './notebook';
 import Sheet from './sheet';
-import { isNullOrUndefined } from 'util';
 
 export class ServiceStorage {
   static hasLocalStorage = !(typeof localStorage === 'undefined');

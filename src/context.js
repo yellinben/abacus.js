@@ -91,14 +91,14 @@ export default class Context {
   }
 
   addLines(...lines) {
-    const prevLength = this.lines.length;
+    // const prevLength = this.lines.length;
 
     lines.flat().forEach(input => {
       return this.insertLine(input)
     });
 
     this.processLines();
-    return this.lines.slice(prevLength);
+    // return this.lines.slice(prevLength);
   }
 
   removeLine(line, reprocess = true) {
@@ -142,10 +142,7 @@ export default class Context {
   }
 
   processLines = () => {
-    if (!this.shouldProcess()) {
-      console.warn('should not process');
-      return;
-    }
+    if (!this.shouldProcess()) return;
 
     this.isProcessed = false;
 
