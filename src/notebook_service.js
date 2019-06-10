@@ -1,5 +1,6 @@
 import Notebook from './notebook';
 import Sheet from './sheet';
+import { isNullOrUndefined } from 'util';
 
 export class ServiceStorage {
   static hasLocalStorage = !(typeof localStorage === 'undefined');
@@ -23,9 +24,13 @@ export class ServiceStorage {
     return localStorage.setItem(key, data);
   }
 
+  has(key) {
+    return !!this.get(key);
+  }
+
   remove(key) {
     if (!ServiceStorage.hasLocalStorage) return;
-    return localStorage.removeItem(key);
+    if (this.has(key)) return localStorage.removeItem(key);
   }
 
   serialize(item, serializer = undefined) {
@@ -88,8 +93,6 @@ export class NotebookService {
     const sheets = this.loadSheets();
     this.notebook.addSheets(sheets);
     this.prune();
-
-    this.saveNotebook();
   }
 
   loadNotebook() {
@@ -117,6 +120,7 @@ export class NotebookService {
       this.sheetKey(id), Sheet.fromJSON
     );
     
+    if (!sheet) return;
     sheet.notebook = this.notebook;
     return sheet;
   }
@@ -176,8 +180,9 @@ export class NotebookService {
   }
 
   removeSheet(sheet) {
-    this.notebook.removeSheet(sheet);
-    return this.save(false);
+    this.storage.remove(this.sheetKey(sheet));
+    this.saveSheetIds();
+    return sheet;
   }
 
   saveSheet = (sheet, saveIds = true) => {
@@ -188,11 +193,13 @@ export class NotebookService {
     return sheet;
   }
 
-  saveSheetIds = () => {
+  saveSheetIds = (prune = true) => {
     return this.storage.set(
       NotebookService.SHEET_IDS_KEY, 
       this.sheetIds()
     );
+
+    if (prune) this.prune();
   }
 
   saveSheets = (...sheets) => {
@@ -216,8 +223,7 @@ export class NotebookService {
   }
 
   save(...sheets) {
-    this.saveSheetIds();
-    this.saveNotebook();
+    this.saveSheetIds(false);
 
     if (sheets.length)
       this.saveSheets(sheets);

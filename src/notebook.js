@@ -31,16 +31,24 @@ export default class Notebook {
     return new Notebook({sheets: [...sheets.flat()]});
   }
 
-  allSheets(sort = 'id') {
+  get allSheets() {
+    return this.sortedSheets('created');
+  }
+
+  sortedSheets(sort = 'id', order = 'asc') {
     return Object.values(this.sheets).sort((sheetA, sheetB) => { 
       const sortA = sheetA[sort].toString();
       const sortB = sheetB[sort].toString();
-      return sortB.localeCompare(sortA);
+
+      if (order.toLowerCase() === 'asc')
+        return sortB.localeCompare(sortA);
+      else
+        return sortA.localeCompare(sortB);
     });
   }
 
   recentSheets() {
-    return this.allSheets('updated');
+    return this.sortedSheets('updated');
   }
 
   latestSheet() {
@@ -97,8 +105,12 @@ export default class Notebook {
 
   removeSheet(sheet) {
     const sheetObj = this.findSheet(sheet);
+
     if (sheetObj.id in this.sheets)
       delete this.sheets[sheetObj.id];
+
+    if (this.service)
+      this.service.removeSheet(sheetObj);
   }
 
   setSheet = (sheet) => {
@@ -136,7 +148,7 @@ export default class Notebook {
   }
   
   _sheetMap(prop, sort = undefined) {
-    return this.allSheets(sort).map(sheet => sheet[prop]);
+    return this.sortedSheets(sort).map(sheet => sheet[prop]);
   }
 
   _titleExists(title) {
@@ -155,7 +167,7 @@ export default class Notebook {
     return title;
   }
 
-  save(sheets = this.allSheets()) {
+  save = (sheets = this.allSheets) => {
     if (this.service) this.service.save(sheets);
   }
 

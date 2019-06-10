@@ -83,8 +83,9 @@ export default class Sheet {
     );
   }
 
-  save() {
-    if (this.notebook) this.notebook.save(this);
+  save = () => {
+    if (this.notebook) 
+      return this.notebook.save(this);
   }
 
   update(contents) {
@@ -93,6 +94,11 @@ export default class Sheet {
     else
       this.contents = contents;    
     this.save();
+  }
+
+  remove() {
+    if (this.notebook) 
+      return this.notebook.removeSheet(this);
   }
 
   toJSON() {
@@ -109,6 +115,7 @@ export default class Sheet {
   }
 
   static toJSON(sheet) {
+    console.log('[toJSON]', sheet);
     return {
       id: sheet.id,
       title: sheet.title,
@@ -121,8 +128,11 @@ export default class Sheet {
   }
 
   static fromJSON(json) {
+    if (!json) return;
+
     const data = parseJSON(json);
     let sheet;
+    console.log('[fromJSON]', data);
 
     if (typeof data === 'string') {
       sheet = new Sheet();
