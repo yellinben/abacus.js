@@ -93,17 +93,23 @@ export class NotebookService {
   }
 
   loadNotebook() {
-    const {id, author, saved} = this.storage
+    const notebookData = this.storage
       .get(NotebookService.NOTEBOOK_KEY);
+    let opts = {};
+    
+    if (notebookData) {
+      const id = notebookData['id'];
+      const author = notebookData['author'];
+      const saved = notebookData['saved'];
+      if (saved) this.saved = saved;
+      opts = {id, author, service: this};
+    }
 
-    if (this.saved)
-      this.saved = saved;
-
-    return new Notebook({id, author, service: this});
+    return new Notebook(opts);
   }
 
   loadSheetIds() {
-    return this.storage.get(NotebookService.SHEET_IDS_KEY);
+    return this.storage.get(NotebookService.SHEET_IDS_KEY) || [];
   }
 
   loadSheet = (id) => {
@@ -116,9 +122,14 @@ export class NotebookService {
   }
 
   loadSheets() {
-    return this.loadSheetIds()
+    const sheets = this.loadSheetIds()
       .map(this.loadSheet)
       .filter(Boolean);
+
+    if (sheets.length < 1)
+      sheets.push(this.createSheet());
+
+    return sheets;
   }
 
   sheetKey(sheet) {
@@ -210,6 +221,8 @@ export class NotebookService {
 
     if (sheets.length)
       this.saveSheets(sheets);
+
+    return this;
   }
 
   saveAll() {

@@ -67,6 +67,10 @@ export default class Sheet {
     return this._context.resultsFormatted();
   }
 
+  resultsRaw() {
+    return this._context.results();
+  }
+
   get lines() {
     return this._context.lines
       .map(line => ({
