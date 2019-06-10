@@ -1,6 +1,6 @@
 import Unit from './unit';
 import calc from './calculator';
-import { parseJSON } from './utils';
+import { parseJSON, isValidArithmetic } from './utils';
 
 export default class Line {
   constructor(input, context = undefined) {
@@ -69,10 +69,7 @@ export default class Line {
   }
 
   isCalculatable() {
-    // to be calculable, line must only contain
-    // numeric and mathematical symbols
-    const valid_re = /^[0-9().<>\s&!*/^+-]+$/;
-    return valid_re.test(this.value);
+    return isValidArithmetic(this.value);
   }
 
   calculate() {

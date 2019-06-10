@@ -69,6 +69,17 @@ export const isCurrencyTerm = (term) => {
   return term && /^(USD|EUR|CAD)$/.test(term);
 }
 
+export const isValidArithmetic = (expr) => {
+  if (!expr) return false;
+
+  // to be calculable, line must only contain
+  // numeric and mathematical symbols
+  const valid_char_re = /^[0-9().<>\s&!*/^+-]+$/;
+  const valid_expr_re = /[0-9][\s)]*\s*$/;
+
+  return (valid_char_re.test(expr) && valid_expr_re.test(expr));
+}
+
 // https://gist.github.com/hagemann/382adfc57adbd5af078dc93feef01fe1
 export const slugify = (str) => {
   const a = 'àáäâãåăæçèéëêǵḧìíïîḿńǹñòóöôœøṕŕßśșțùúüûǘẃẍÿź·/_,:;'
